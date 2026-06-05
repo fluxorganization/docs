@@ -41,6 +41,15 @@
         ]
       },
       {
+        "tab": "Thumbnail Service",
+        "pages": [
+          {
+            "group": "Core",
+            "pages": ["api/thumbnails/overview"]
+          }
+        ]
+      },
+      {
         "tab": "Flux Pass",
         "pages": [
           {
