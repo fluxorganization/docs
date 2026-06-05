@@ -1,6 +1,6 @@
 ---
-title: "Verify Webhooks"
-description: "How to securely verify incoming webhook payloads"
+title: "Verify Flux Drop webhook HMAC SHA-256 signatures"
+description: "Verify the X-Fluxdrop-Signature header on incoming Flux Drop webhooks using HMAC SHA-256 and your webhook secret, with a Node.js Express example."
 ---
 
 To ensure that incoming webhooks are genuinely originating from Flux Drop and have not been tampered with, you must verify the signature included in the `X-Fluxdrop-Signature` header.
