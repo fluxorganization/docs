@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "Flux Developer Docs",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#6366F1",
+    "light": "#818CF8",
+    "dark": "#4F46E5"
   },
   "fonts": {
     "family": "Geist"
@@ -86,8 +86,8 @@
     }
   },
   "logo": {
-    "light": "/logo/light.png",
-    "dark": "/logo/dark.png"
+    "light": "/logo/dark.png",
+    "dark": "/logo/light.png"
   },
   "navbar": {
     "links": [
