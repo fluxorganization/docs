@@ -26,15 +26,20 @@
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "Metadata Service",
         "pages": [
           {
-            "group": "Metadata Service",
+            "group": "Core",
             "pages": [
               "api/metadata/overview",
               "api/metadata/meta",
               "api/metadata/dek",
-              "api/metadata/stats",
+              "api/metadata/stats"
+            ]
+          },
+          {
+            "group": "Experimental",
+            "pages": [
               "api/metadata/experimental"
             ]
           }
