@@ -22,7 +22,7 @@ Before you begin, make sure you have:
 
 <Steps>
   <Step title="Wrap a DEK">
-    Before creating file metadata, you need a wrapped DEK. Send a plain Data Encryption Key to the wrap endpoint — the service encrypts it with the master key and returns the wrapped version.
+    Before creating file metadata, you need a wrapped DEK. Send a plain Data Encryption Key to the wrap endpoint - the service encrypts it with the master key and returns the wrapped version.
 
     ```bash
     curl -X POST http://meta.internal:8080/api/v1/dek/wrap \
@@ -40,7 +40,7 @@ Before you begin, make sure you have:
     }
     ```
 
-    Save the `dekEnc` value — you'll use it in the next step.
+    Save the `dekEnc` value - you'll use it in the next step.
   </Step>
   <Step title="Create file metadata">
     Use the wrapped DEK to create a metadata record for your file.

@@ -19,7 +19,7 @@ Synchronizes file metadata from the database to [Valkey](https://valkey.io/) wit
 
 Under normal operation, individual file metadata entries are cached in Valkey with a **1-hour TTL** based on access patterns. This works well for most users, but when a user switches between apps frequently, the cache can become stale or fragmented.
 
-The sync endpoint performs a **bulk synchronization** — it takes all (or the most active) files for a user and pushes them into Valkey with a longer TTL in a single operation, instead of relying on individual cache hits.
+The sync endpoint performs a **bulk synchronization** - it takes all (or the most active) files for a user and pushes them into Valkey with a longer TTL in a single operation, instead of relying on individual cache hits.
 
 <Warning>
   **Hard limit**: A single sync operation cannot exceed **450 MB** of data. Behavior when exceeding this limit depends on the selected sync type.
@@ -30,9 +30,9 @@ The sync endpoint performs a **bulk synchronization** — it takes all (or the m
 | Type | Strategy | On limit exceeded |
 |---|---|---|
 | `allOne` | Sync all files | Returns error, nothing is synced |
-| `allTwo` | Sync all files | Truncates — syncs as many files as fit within the limit |
+| `allTwo` | Sync all files | Truncates - syncs as many files as fit within the limit |
 | `mostOne` | Sync most active files as a group | Returns error, nothing is synced |
-| `mostTwo` | Sync most active files as a group | Truncates — syncs as many files as fit within the limit |
+| `mostTwo` | Sync most active files as a group | Truncates - syncs as many files as fit within the limit |
 
 <Info>
   **Why `mostOne` / `mostTwo`?** Instead of making 15 separate cache hits for the 15 most active files, you make a single sync call to cache them all at once. This reduces endpoint hits and ensures the most accessed files are always warm in cache.
@@ -172,7 +172,7 @@ Forces immediate removal of cached file metadata without waiting for the TTL to 
   Invalidation type. One of: `OUT`, `DEL`.
 </ParamField>
 
-<Accordion title="Example request — logout">
+<Accordion title="Example request - logout">
 ```json
 {
   "user": "usr_9f8e7d6c",
@@ -181,7 +181,7 @@ Forces immediate removal of cached file metadata without waiting for the TTL to 
 ```
 </Accordion>
 
-<Accordion title="Example request — account deletion">
+<Accordion title="Example request - account deletion">
 ```json
 {
   "user": "usr_9f8e7d6c",
