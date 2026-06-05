@@ -1,6 +1,6 @@
 ---
-title: "Overview"
-description: "Background worker service for generating image and video thumbnails"
+title: "Thumbnail Service overview: background worker for image and video thumbnails"
+description: "Architecture and queue model for the Flux Thumbnail Service, a Bun and FFmpeg worker that generates WebP variants for uploaded files."
 ---
 
 The **Thumbnail Service** is an asynchronous background worker powered by [Bun](https://bun.sh/) and FFmpeg. It listens for jobs on a Valkey queue, generates multiple thumbnail variants, and uploads them directly to our S3-compatible storage.
