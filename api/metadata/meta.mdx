@@ -1,0 +1,190 @@
+---
+title: "File metadata"
+description: "Create, retrieve, and delete file metadata records"
+---
+
+## Create metadata
+
+<div>
+  <code className="font-bold text-lg">POST /api/v1/meta</code>
+</div>
+
+Creates a new metadata record for an uploaded file.
+
+### Request body
+
+<ParamField body="filenameEnc" type="string" required>
+  Encrypted filename — a 32-bit encoded string.
+</ParamField>
+
+<ParamField body="size" type="number" required>
+  File size in bytes.
+</ParamField>
+
+<ParamField body="user" type="string" required>
+  ID of the user who uploaded the file.
+</ParamField>
+
+<ParamField body="mimeType" type="string" required>
+  MIME type of the file (e.g., `image/png`, `application/pdf`).
+</ParamField>
+
+<ParamField body="dekEnc" type="string" required>
+  32-bit encrypted Data Encryption Key (DEK), wrapped by the master key.
+</ParamField>
+
+<ParamField body="thumb" type="boolean" required>
+  Whether a thumbnail should be generated for this file.
+</ParamField>
+
+<Accordion title="Example request">
+```json
+{
+  "filenameEnc": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+  "size": 204800,
+  "user": "usr_9f8e7d6c",
+  "mimeType": "image/png",
+  "dekEnc": "enc_k3y_wr4pp3d_by_m4st3r_k3y_00",
+  "thumb": true
+}
+```
+</Accordion>
+
+### Response `200`
+
+Returns the created metadata record with a generated `id` and `uploadedDate`.
+
+```json
+{
+  "id": "file_abc123",
+  "filenameEnc": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+  "size": 204800,
+  "user": "usr_9f8e7d6c",
+  "mimeType": "image/png",
+  "dekEnc": "enc_k3y_wr4pp3d_by_m4st3r_k3y_00",
+  "uploadedDate": "2026-06-05T14:30:00Z"
+}
+```
+
+---
+
+## Get file metadata
+
+<div>
+  <code className="font-bold text-lg">GET /api/v1/meta/&#123;fileId&#125;</code>
+</div>
+
+Retrieves the full metadata for a single file, including thumbnail availability and the encrypted DEK.
+
+### Path parameters
+
+<ParamField path="fileId" type="string" required>
+  The unique file identifier.
+</ParamField>
+
+### Response `200`
+
+```json
+{
+  "id": "file_abc123",
+  "filenameEnc": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+  "size": 204800,
+  "mimeType": "image/png",
+  "dekEnc": "enc_k3y_wr4pp3d_by_m4st3r_k3y_00",
+  "thumbs": {
+    "mobile": true,
+    "web": true,
+    "webPre": false
+  },
+  "uploadedDate": "2026-06-05T14:30:00Z"
+}
+```
+
+### Response `404`
+
+Returned when the file does not exist.
+
+```json
+{
+  "error": "not_found"
+}
+```
+
+---
+
+## List user files
+
+<div>
+  <code className="font-bold text-lg">GET /api/v1/meta?userId=</code>
+</div>
+
+Retrieves a list of all file metadata for a specific user. 
+
+<Note>
+  The `dekEnc` field is intentionally excluded from list responses. There is no reason to return the encrypted DEK for every file in a bulk listing.
+</Note>
+
+### Query parameters
+
+<ParamField query="userId" type="string" required>
+  The user ID to filter files by.
+</ParamField>
+
+### Response `200`
+
+```json
+{
+  "files": [
+    {
+      "id": "file_abc123",
+      "filenameEnc": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+      "size": 204800,
+      "mimeType": "image/png",
+      "thumb": true,
+      "uploadedDate": "2026-06-05T14:30:00Z"
+    },
+    {
+      "id": "file_def456",
+      "filenameEnc": "f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3",
+      "size": 1048576,
+      "mimeType": "application/pdf",
+      "thumb": false,
+      "uploadedDate": "2026-06-04T09:15:00Z"
+    }
+  ]
+}
+```
+
+---
+
+## Delete file metadata
+
+<div>
+  <code className="font-bold text-lg">DELETE /api/v1/meta/&#123;fileId&#125;</code>
+</div>
+
+Permanently deletes the metadata record for a file.
+
+### Path parameters
+
+<ParamField path="fileId" type="string" required>
+  The unique file identifier.
+</ParamField>
+
+### Response `200`
+
+```json
+{
+  "deleted": "file_abc123"
+}
+```
+
+### Response `404`
+
+Returned when the file does not exist.
+
+```json
+{
+  "error": "not_found"
+}
+```

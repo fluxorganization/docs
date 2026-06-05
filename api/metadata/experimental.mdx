@@ -1,0 +1,217 @@
+---
+title: "Experimental"
+description: "Cache sync, prefetch, and invalidation endpoints (subject to change)"
+---
+
+<Warning>
+  Experimental endpoints are prefixed with `/api/v1/e/` and are **not guaranteed** to be included in the main API. They are subject to change or removal without notice.
+</Warning>
+
+## Sync metadata cache
+
+<div>
+  <code className="font-bold text-lg">POST /api/v1/e/meta/sync</code>
+</div>
+
+Synchronizes file metadata from the database to [Valkey](https://valkey.io/) with an extended TTL.
+
+### How sync works
+
+Under normal operation, individual file metadata entries are cached in Valkey with a **1-hour TTL** based on access patterns. This works well for most users, but when a user switches between apps frequently, the cache can become stale or fragmented.
+
+The sync endpoint performs a **bulk synchronization** — it takes all (or the most active) files for a user and pushes them into Valkey with a longer TTL in a single operation, instead of relying on individual cache hits.
+
+<Warning>
+  **Hard limit**: A single sync operation cannot exceed **450 MB** of data. Behavior when exceeding this limit depends on the selected sync type.
+</Warning>
+
+### Sync types
+
+| Type | Strategy | On limit exceeded |
+|---|---|---|
+| `allOne` | Sync all files | Returns error, nothing is synced |
+| `allTwo` | Sync all files | Truncates — syncs as many files as fit within the limit |
+| `mostOne` | Sync most active files as a group | Returns error, nothing is synced |
+| `mostTwo` | Sync most active files as a group | Truncates — syncs as many files as fit within the limit |
+
+<Info>
+  **Why `mostOne` / `mostTwo`?** Instead of making 15 separate cache hits for the 15 most active files, you make a single sync call to cache them all at once. This reduces endpoint hits and ensures the most accessed files are always warm in cache.
+</Info>
+
+### Request body
+
+<ParamField body="user" type="string" required>
+  The user ID whose files you want to sync.
+</ParamField>
+
+<ParamField body="type" type="string" required>
+  The sync strategy. One of: `allOne`, `allTwo`, `mostOne`, `mostTwo`.
+</ParamField>
+
+<Accordion title="Example request">
+```json
+{
+  "user": "usr_9f8e7d6c",
+  "type": "mostTwo"
+}
+```
+</Accordion>
+
+### Response `200`
+
+```json
+{
+  "user": "usr_9f8e7d6c",
+  "synced": 142,
+  "skipped": 8
+}
+```
+
+<ResponseField name="synced" type="number">
+  Number of file metadata entries successfully synced to Valkey.
+</ResponseField>
+
+<ResponseField name="skipped" type="number">
+  Number of entries skipped (e.g., due to the hard limit in `allTwo` / `mostTwo`).
+</ResponseField>
+
+### Response `400`
+
+Returned when the sync would exceed the 450 MB hard limit (for `allOne` and `mostOne` types).
+
+```json
+{
+  "error": "limit_exceeded"
+}
+```
+
+### Response `404`
+
+```json
+{
+  "error": "user_not_found"
+}
+```
+
+---
+
+## Prefetch metadata
+
+<div>
+  <code className="font-bold text-lg">POST /api/v1/e/meta/prefetch</code>
+</div>
+
+Proactively loads file metadata into the Valkey cache **before** the TTL expires. Instead of waiting for cache entries to expire and then re-fetching on demand, prefetch pushes data into the cache ahead of time.
+
+The endpoint fetches the **most frequently accessed** files for the given user from the database and pushes them into Valkey.
+
+### Request body
+
+<ParamField body="user" type="string" required>
+  The user ID whose file metadata you want to prefetch.
+</ParamField>
+
+<ParamField body="limit" type="number" required>
+  Maximum number of files to prefetch. The service selects the most frequently queried files up to this limit.
+</ParamField>
+
+<Accordion title="Example request">
+```json
+{
+  "user": "usr_9f8e7d6c",
+  "limit": 50
+}
+```
+</Accordion>
+
+### Response `200`
+
+```json
+{
+  "user": "usr_9f8e7d6c",
+  "prefetched": 48
+}
+```
+
+<ResponseField name="prefetched" type="number">
+  Number of file metadata entries pushed to cache.
+</ResponseField>
+
+### Response `404`
+
+```json
+{
+  "error": "user_not_found"
+}
+```
+
+---
+
+## Invalidate metadata cache
+
+<div>
+  <code className="font-bold text-lg">POST /api/v1/e/meta/invalidate</code>
+</div>
+
+Forces immediate removal of cached file metadata without waiting for the TTL to expire. The behavior depends on the invalidation type.
+
+### Invalidation types
+
+| Type | Trigger | What it does |
+|---|---|---|
+| `OUT` | User logs out | Removes metadata from **Valkey only**. The database is untouched. |
+| `DEL` | User deletes account | Removes metadata from **both Valkey and the database** (Convex). |
+
+### Request body
+
+<ParamField body="user" type="string" required>
+  The user ID whose cached metadata you want to invalidate.
+</ParamField>
+
+<ParamField body="type" type="string" required>
+  Invalidation type. One of: `OUT`, `DEL`.
+</ParamField>
+
+<Accordion title="Example request — logout">
+```json
+{
+  "user": "usr_9f8e7d6c",
+  "type": "OUT"
+}
+```
+</Accordion>
+
+<Accordion title="Example request — account deletion">
+```json
+{
+  "user": "usr_9f8e7d6c",
+  "type": "DEL"
+}
+```
+</Accordion>
+
+### Response `200`
+
+```json
+{
+  "user": "usr_9f8e7d6c",
+  "type": "OUT",
+  "invalidated": 142
+}
+```
+
+<ResponseField name="type" type="string">
+  The invalidation type that was executed (`OUT` or `DEL`).
+</ResponseField>
+
+<ResponseField name="invalidated" type="number">
+  Number of metadata entries removed.
+</ResponseField>
+
+### Response `404`
+
+```json
+{
+  "error": "user_not_found"
+}
+```

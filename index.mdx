@@ -1,20 +1,57 @@
 ---
 title: "Introduction"
-description: "Welcome to your project"
+description: "Welcome to the Flux developer documentation - everything you need to integrate with the Flux platform."
 ---
 
-Write a short description of your product here. What it does, who it's for, and what they can accomplish with it.
+Flux is a secure, encrypted file platform built for privacy-first storage and delivery. These docs cover the internal services, API endpoints, and architecture that power Flux.
 
-<Tip>
-  Ready to make this your own? Start by editing this page. Update your `docs.json` file to customize your site. Then fill out the [Quickstart](/quickstart) page.
-</Tip>
+<Warning>
+  These docs are intended for **internal developers only**. All services run on the internal network and are **not** accessible from the public internet. If you're looking for the user-facing product, visit [fluxdrop.eu](https://fluxdrop.eu).
+</Warning>
+
+## Platform services
+
+Flux is composed of modular services, each responsible for a specific domain:
+
+<CardGroup cols={2}>
+  <Card title="Metadata Service" icon="database" href="/api/metadata/overview">
+    Manages file metadata, DEK wrapping, caching with Valkey, and aggregate statistics.
+  </Card>
+  <Card title="Thumbnail Service" icon="image" href="#">
+    Generates and serves responsive thumbnails for uploaded files. *Coming soon.*
+  </Card>
+  <Card title="Flux Pass" icon="shield-halved" href="#">
+    Handles authentication, sessions, and access control. *Coming soon.*
+  </Card>
+</CardGroup>
+
+## Key concepts
+
+Before diving into the API, familiarize yourself with these core concepts:
+
+| Concept | Description |
+|---|---|
+| **DEK** | Data Encryption Key — a per-file symmetric key used to encrypt file contents. |
+| **Master key** | Server-side key used to wrap (encrypt) and unwrap (decrypt) DEKs. |
+| **Valkey** | In-memory cache layer used to store frequently accessed metadata with TTL-based expiration. |
+| **Convex** | The primary database backing persistent metadata and file records. |
+
+## API conventions
+
+All Flux API endpoints follow a consistent pattern:
+
+```
+/api/{version}/{resource}
+```
+
+- Current version: **v1**
+- No hyphens in endpoint paths
+- Standard methods: `POST`, `GET`, `DELETE`
+
+Read the full [API conventions](/api/metadata/overview) guide for details.
+
+## Get started
 
 <Card title="Quickstart" icon="rocket" href="/quickstart">
-  This card links to the quickstart page in your project.
-</Card>
-<Card title="Components" icon="puzzle-piece" href="https://mintlify.com/docs/components">
-  Add cards, callouts, steps, tabs, and more to design and structure your pages.
-</Card>
-<Card title="Settings" icon="gear" href="https://mintlify.com/docs/organize/settings">
-  Set your site name, branding, and navigation in the `docs.json` file.
+  Set up your environment and make your first API call in minutes.
 </Card>

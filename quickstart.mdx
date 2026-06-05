@@ -1,47 +1,135 @@
 ---
 title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+description: "Set up your environment and make your first API call to the Flux platform"
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
+This guide walks you through making your first requests to the Flux Metadata Service. By the end, you'll have created a file metadata record, wrapped a DEK, and retrieved the metadata back.
 
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
+<Warning>
+  The Metadata Service is **internal only**. All endpoints are accessible exclusively through the internal network. You must be connected to a Flux VPS or have direct internal network access - these endpoints are **not** exposed to the public internet.
+</Warning>
 
 ## Prerequisites
 
-Before you begin, you must have:
+Before you begin, make sure you have:
 
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
+- Direct access to the Flux internal network (VPS connectivity)
+- A valid user ID for the target environment
+- `curl` or any HTTP client installed
+- The Metadata Service internal base URL (e.g., `http://meta.internal:8080`)
 
-## Get started
+## Make your first API calls
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+  <Step title="Wrap a DEK">
+    Before creating file metadata, you need a wrapped DEK. Send a plain Data Encryption Key to the wrap endpoint — the service encrypts it with the master key and returns the wrapped version.
 
     ```bash
-    npm install your-package
+    curl -X POST http://meta.internal:8080/api/v1/dek/wrap \
+      -H "Content-Type: application/json" \
+      -d '{
+        "dek": "pl41n_d3k_k3y_32b1ts_0000000000"
+      }'
+    ```
+
+    You should receive a response like:
+
+    ```json
+    {
+      "dekEnc": "enc_k3y_wr4pp3d_by_m4st3r_k3y_00"
+    }
+    ```
+
+    Save the `dekEnc` value — you'll use it in the next step.
+  </Step>
+  <Step title="Create file metadata">
+    Use the wrapped DEK to create a metadata record for your file.
+
+    ```bash
+    curl -X POST http://meta.internal:8080/api/v1/meta \
+      -H "Content-Type: application/json" \
+      -d '{
+        "filenameEnc": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+        "size": 204800,
+        "user": "usr_9f8e7d6c",
+        "mimeType": "image/png",
+        "dekEnc": "enc_k3y_wr4pp3d_by_m4st3r_k3y_00",
+        "thumb": true
+      }'
+    ```
+
+    The response includes the generated `id` and `uploadedDate`:
+
+    ```json
+    {
+      "id": "file_abc123",
+      "filenameEnc": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+      "size": 204800,
+      "user": "usr_9f8e7d6c",
+      "mimeType": "image/png",
+      "dekEnc": "enc_k3y_wr4pp3d_by_m4st3r_k3y_00",
+      "uploadedDate": "2026-06-05T14:30:00Z"
+    }
     ```
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
+  <Step title="Retrieve the metadata">
+    Fetch the metadata back using the file ID from the previous response.
 
     ```bash
-    your-cli init
+    curl http://meta.internal:8080/api/v1/meta/file_abc123
+    ```
+
+    ```json
+    {
+      "id": "file_abc123",
+      "filenameEnc": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+      "size": 204800,
+      "mimeType": "image/png",
+      "dekEnc": "enc_k3y_wr4pp3d_by_m4st3r_k3y_00",
+      "thumbs": {
+        "mobile": true,
+        "web": false,
+        "webPre": false
+      },
+      "uploadedDate": "2026-06-05T14:30:00Z"
+    }
     ```
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
+  <Step title="Check platform stats">
+    Verify that your file was counted in the aggregate statistics.
 
     ```bash
-    your-cli start
+    curl http://meta.internal:8080/api/v1/stats
+    ```
+
+    ```json
+    {
+      "totalFiles": 1,
+      "totalSizeBytes": 204800
+    }
     ```
   </Step>
 </Steps>
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+## Next steps
 
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
+Now that you've made your first API calls, explore the full API reference:
+
+<CardGroup cols={2}>
+  <Card title="File metadata" icon="file" href="/api/metadata/meta">
+    Full CRUD operations for metadata records.
+  </Card>
+  <Card title="DEK management" icon="key" href="/api/metadata/dek">
+    Wrap and unwrap encryption keys.
+  </Card>
+  <Card title="Statistics" icon="chart-bar" href="/api/metadata/stats">
+    Aggregate file and storage metrics.
+  </Card>
+  <Card title="Experimental" icon="flask" href="/api/metadata/experimental">
+    Cache sync, prefetch, and invalidation.
+  </Card>
+</CardGroup>
+
+<Tip>
+  Need help? Reach out at [support@fluxorg.pl](mailto:support@fluxorg.pl).
 </Tip>

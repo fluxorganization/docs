@@ -1,0 +1,94 @@
+---
+title: "DEK management"
+description: "Wrap and unwrap Data Encryption Keys using the master key"
+---
+
+The DEK (Data Encryption Key) endpoints handle encryption key wrapping. The client's VPS sends a plain DEK, and the Metadata Service encrypts it with the master key (wrap) or decrypts an existing wrapped DEK back to plaintext (unwrap).
+
+<Info>
+  These endpoints are called by the client VPS (VPS 20) during file upload and download flows. The plain DEK never leaves the internal network unencrypted.
+</Info>
+
+---
+
+## Wrap DEK
+
+<div>
+  <code className="font-bold text-lg">POST /api/v1/dek/wrap</code>
+</div>
+
+Encrypts a plain DEK using the master key. The client VPS sends the plain DEK, and the service returns it wrapped.
+
+### Request body
+
+<ParamField body="dek" type="string" required>
+  The plain 32-bit Data Encryption Key to wrap.
+</ParamField>
+
+<Accordion title="Example request">
+```json
+{
+  "dek": "pl41n_d3k_k3y_32b1ts_0000000000"
+}
+```
+</Accordion>
+
+### Response `200`
+
+```json
+{
+  "dekEnc": "enc_k3y_wr4pp3d_by_m4st3r_k3y_00"
+}
+```
+
+### Response `400`
+
+Returned when the provided DEK is invalid or malformed.
+
+```json
+{
+  "error": "invalid_dek"
+}
+```
+
+---
+
+## Unwrap DEK
+
+<div>
+  <code className="font-bold text-lg">POST /api/v1/dek/unwrap</code>
+</div>
+
+Decrypts a wrapped DEK back to its plaintext form using the master key.
+
+### Request body
+
+<ParamField body="dekEnc" type="string" required>
+  The 32-bit encrypted DEK (wrapped by the master key) to unwrap.
+</ParamField>
+
+<Accordion title="Example request">
+```json
+{
+  "dekEnc": "enc_k3y_wr4pp3d_by_m4st3r_k3y_00"
+}
+```
+</Accordion>
+
+### Response `200`
+
+```json
+{
+  "dek": "pl41n_d3k_k3y_32b1ts_0000000000"
+}
+```
+
+### Response `400`
+
+Returned when the provided encrypted DEK is invalid or cannot be decrypted.
+
+```json
+{
+  "error": "invalid_enc_dek"
+}
+```

@@ -1,0 +1,31 @@
+---
+title: "Statistics"
+description: "Retrieve aggregate statistics for all stored files"
+---
+
+## Get statistics
+
+<div>
+  <code className="font-bold text-lg">GET /api/v1/stats</code>
+</div>
+
+Returns aggregate statistics across all files managed by the Metadata Service.
+
+### Response `200`
+
+```json
+{
+  "totalFiles": 14832,
+  "totalSizeBytes": 8493726105
+}
+```
+
+### Response fields
+
+<ResponseField name="totalFiles" type="number">
+  Total number of file metadata records stored.
+</ResponseField>
+
+<ResponseField name="totalSizeBytes" type="number">
+  Combined size of all files in bytes.
+</ResponseField>

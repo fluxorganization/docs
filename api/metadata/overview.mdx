@@ -1,0 +1,83 @@
+---
+title: "Overview"
+description: "Introduction to the Metadata Service and API conventions"
+---
+
+The Metadata Service is the core service responsible for managing file metadata, encryption key wrapping (DEK), and cache synchronization within the Flux platform.
+
+<Warning>
+  The Metadata Service operates exclusively on the **internal network**. None of its endpoints are exposed to the public internet. You must have direct VPS or internal network access to reach these APIs.
+</Warning>
+
+## API conventions
+
+All Flux API endpoints follow a strict set of conventions.
+
+### Base path and versioning
+
+Every endpoint starts with `/api/` followed by the API version:
+
+```
+/api/{version}/...
+```
+
+The current version is **v1**, so all endpoints are prefixed with:
+
+```
+/api/v1/
+```
+
+### Naming rules
+
+Endpoint paths **must not** contain hyphens. Use concatenated words instead.
+
+| <Icon icon="circle-check" color="green" /> Correct | <Icon icon="circle-xmark" color="red" /> Incorrect |
+|---|---|
+| `/api/v1/meta` | `/api/v1/meta-data` |
+| `/api/v1/filemeta` | `/api/v1/file-meta` |
+
+### HTTP methods
+
+Each endpoint typically supports up to three standard methods:
+
+| Method | Purpose |
+|---|---|
+| `POST` | Create or trigger an action |
+| `GET` | Retrieve data |
+| `DELETE` | Remove a resource |
+
+Additional methods may be available depending on the endpoint's use case.
+
+### Query parameters
+
+`GET` endpoints may accept query parameters for filtering and pagination:
+
+```
+GET /api/v1/meta?userId=abc123
+```
+
+## Service architecture
+
+The Metadata Service handles three main areas:
+
+<CardGroup cols={3}>
+  <Card title="File metadata" icon="file" href="/api/metadata/meta">
+    CRUD operations for file metadata records.
+  </Card>
+  <Card title="DEK management" icon="key" href="/api/metadata/dek">
+    Wrap and unwrap Data Encryption Keys using the master key.
+  </Card>
+  <Card title="Statistics" icon="chart-bar" href="/api/metadata/stats">
+    Aggregate statistics across all stored files.
+  </Card>
+</CardGroup>
+
+### Experimental endpoints
+
+<Card title="Experimental" icon="flask" href="/api/metadata/experimental">
+  Cache sync, prefetch, and invalidation endpoints. These are experimental and may not be included in the main API.
+</Card>
+
+<Warning>
+  Experimental endpoints are prefixed with `/api/v1/e/` and are subject to change or removal without notice.
+</Warning>
