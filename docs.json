@@ -44,6 +44,45 @@
             ]
           }
         ]
+      },
+      {
+        "tab": "Flux Pass",
+        "pages": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api/fluxpass/overview"
+            ]
+          },
+          {
+            "group": "Authentication",
+            "pages": [
+              "api/fluxpass/auth",
+              "api/fluxpass/oauth"
+            ]
+          },
+          {
+            "group": "User management",
+            "pages": [
+              "api/fluxpass/user",
+              "api/fluxpass/connect"
+            ]
+          },
+          {
+            "group": "Payments",
+            "pages": [
+              "api/fluxpass/payments"
+            ]
+          },
+          {
+            "group": "Platform",
+            "pages": [
+              "api/fluxpass/admin",
+              "api/fluxpass/audit",
+              "api/fluxpass/health"
+            ]
+          }
+        ]
       }
     ],
     "global": {
