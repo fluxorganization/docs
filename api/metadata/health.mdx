@@ -1,0 +1,23 @@
+---
+title: "Metadata Service health check endpoint"
+sidebarTitle: "Health"
+description: "Check the uptime and status of the Metadata Service and its dependencies (Valkey, Convex)."
+---
+
+## Health check
+
+<div>
+  <code className="font-bold text-lg">GET /health</code>
+</div>
+
+Returns the current status of the Metadata Service. Use this endpoint for uptime monitoring and load balancer health checks.
+
+<Snippet file="internal-network.mdx"/>
+
+### Response `200`
+
+```json
+{
+  "status": "ok"
+}
+```

@@ -1,0 +1,38 @@
+---
+title: "Error reference and status codes"
+sidebarTitle: "Errors"
+description: "A comprehensive guide to Flux API error codes, their meanings, and how to resolve them."
+---
+
+When an API request fails, Flux returns a standard JSON error response containing a `message` and an appropriate HTTP status code.
+
+## Standard HTTP status codes
+
+| Code | Status | Description |
+|---|---|---|
+| `400` | Bad Request | The request was malformed or missing required parameters. |
+| `401` | Unauthorized | Authentication failed. Missing or invalid Bearer token / signature. |
+| `403` | Forbidden | You are authenticated but lack the necessary permissions or service entitlements. |
+| `404` | Not Found | The requested resource (file, user, endpoint) does not exist. |
+| `409` | Conflict | The resource already exists (e.g., email already registered) or state conflict. |
+| `429` | Too Many Requests | Rate limit exceeded. Back off and try again later. |
+| `500` | Internal Server Error | Something went wrong on our end (e.g., Convex database timeout). |
+
+## Common error messages
+
+Here are specific error messages you might encounter across our services and what they mean:
+
+### Authentication & Flux Pass
+- **`Invalid credentials`** (401): Incorrect email or password.
+- **`Invalid or expired verification code`** (401): The 2FA or email verification code is wrong or expired.
+- **`Invalid or expired refresh token`** (401): The refresh token has expired or was already rotated. You must log in again.
+- **`User already exists`** (409): Attempting to register an email that is already verified.
+
+### Metadata Service
+- **`invalid_dek`** (400): The provided Data Encryption Key is malformed or invalid.
+- **`file_not_found`** (404): The requested `fileId` does not exist in the database or cache.
+- **`convex_timeout`** (500): The underlying Convex database took too long to respond.
+
+### Webhooks
+- **`Missing signature`** (401): The `X-Fluxdrop-Signature` header was not provided.
+- **`Invalid signature`** (401): The HMAC SHA-256 signature does not match the payload.

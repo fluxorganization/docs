@@ -20,7 +20,16 @@
             "group": "Getting Started",
             "pages": [
               "index",
-              "quickstart"
+              "quickstart",
+              "environments"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              "errors",
+              "limits",
+              "changelog"
             ]
           }
         ]
@@ -34,7 +43,8 @@
               "api/metadata/overview",
               "api/metadata/meta",
               "api/metadata/dek",
-              "api/metadata/stats"
+              "api/metadata/stats",
+              "api/metadata/health"
             ]
           },
           {

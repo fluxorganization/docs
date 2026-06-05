@@ -1,0 +1,30 @@
+---
+title: "Environments and base URLs"
+sidebarTitle: "Environments"
+description: "Available Flux API environments for development, staging, and production."
+---
+
+Flux provides distinct environments to ensure you can safely develop and test your integrations without affecting production data.
+
+<Warning>
+  Never run automated tests or development scripts against the Production environment.
+</Warning>
+
+## Internal APIs (Metadata Service)
+
+The Metadata Service is only accessible from within the internal network. Depending on which internal network you are connected to (via VPN or VPS), the base URL changes:
+
+| Environment | Base URL | Usage |
+|---|---|---|
+| **Development** | `http://meta.dev.internal:8080` | Unstable, contains bleeding-edge features. Database is wiped frequently. |
+| **Staging** | `http://meta.staging.internal:8080` | Pre-production environment. Mirrors production data structure. Use this for testing your integrations. |
+| **Production** | `http://meta.internal:8080` | Live production data. Strictly for production traffic. |
+
+## Public APIs (Flux Pass)
+
+Flux Pass is accessible from the public internet. Use the following base URLs:
+
+| Environment | Base URL | Usage |
+|---|---|---|
+| **Staging** | `https://api.staging.fluxdrop.com` | Safe testing environment for Auth and User management. |
+| **Production** | `https://api.fluxdrop.com` | Live production API. |

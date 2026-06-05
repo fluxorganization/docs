@@ -1,0 +1,22 @@
+---
+title: "Limits, timeouts, and system resilience"
+sidebarTitle: "Limits & Resilience"
+description: "Understand rate limits, system timeouts, and how Flux services behave under heavy load."
+---
+
+When integrating with Flux, it's crucial to understand our system limits and how to handle degraded states gracefully.
+
+## Rate limiting
+
+We use **Arcjet** to enforce rate limits across our public endpoints (like Flux Pass) to prevent abuse. When a limit is hit, you will receive a `429 Too Many Requests` response.
+
+### Flux Pass limits
+- **Login:** 30 requests per 60 seconds
+- **Register:** 10 requests per 60 seconds
+- **OAuth callbacks:** 10 requests per 60 seconds
+- **Health checks:** 50 requests per 60 seconds
+
+## Timeouts
+
+To ensure system stability, Flux enforces strict timeouts on external integrations:
+- **Webhook delivery:** The Webhook Service waits a maximum of **10 seconds** for your endpoint to respond. If your server takes longer, the delivery is marked as failed.
