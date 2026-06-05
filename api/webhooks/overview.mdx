@@ -12,12 +12,12 @@ It listens to an internal Valkey queue and dispatches HTTP POST requests with cr
 | Component | Technology |
 |---|---|
 | **Runtime** | Bun |
-| **Queue & Logs** | Valkey |
-| **User Agent** | `Fluxhook/1.0` |
+| **Queue and logs** | Valkey |
+| **User agent** | `Fluxhook/1.0` |
 
 ## How it works
 
-When a significant event occurs in the Flux Drop (e.g., a file is uploaded or downloaded), a message is queued for the Webhook Service. The worker then:
+When a significant event occurs in Flux Drop (for example, a file is uploaded or downloaded), a message is queued for the Webhook Service. The worker then:
 
 1. Constructs a standard JSON payload with the event details.
 2. Computes an HMAC SHA-256 signature using your webhook secret.
@@ -75,7 +75,7 @@ The Webhook Service currently supports the following event types:
 ### File events
 - `file.created` - Triggered when a new file is uploaded.
 - `file.deleted` - Triggered when a file is deleted.
-- `file.downloaded` - Triggered when a file download is triggered.
+- `file.downloaded` - Triggered when a file is downloaded.
 
 ### Share events
 - `share.linked` - Triggered when a share link is generated.
