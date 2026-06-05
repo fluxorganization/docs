@@ -3,7 +3,7 @@ title: "File metadata"
 description: "Create, retrieve, and delete file metadata records"
 ---
 
-## Create metadata
+## Create file metadata
 
 <div>
   <code className="font-bold text-lg">POST /api/v1/meta</code>
@@ -118,7 +118,7 @@ Returned when the file does not exist.
   <code className="font-bold text-lg">GET /api/v1/meta?userId=</code>
 </div>
 
-Retrieves a list of all file metadata for a specific user. 
+Retrieves a list of all file metadata for a specific user.
 
 <Note>
   The `dekEnc` field is intentionally excluded from list responses. There is no reason to return the encrypted DEK for every file in a bulk listing.
