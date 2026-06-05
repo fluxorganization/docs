@@ -1,0 +1,125 @@
+---
+title: "OAuth"
+description: "Sign in with GitHub, Google, or Microsoft"
+---
+
+Flux Pass supports OAuth sign-in through three providers. The flow is the same for all providers:
+
+1. Your frontend redirects the user to the OAuth provider's authorization page
+2. The provider redirects back to your app with an authorization `code`
+3. Your frontend sends the `code` to the Flux Pass callback endpoint
+4. Flux Pass exchanges the code for an access token, fetches the user profile, and returns tokens
+
+<Info>
+  If the OAuth user doesn't exist, a new account is created automatically with a free DROP service entitlement. If the email already exists, the OAuth provider is linked to the existing account.
+</Info>
+
+---
+
+## GitHub callback
+
+<div>
+  <code className="font-bold text-lg">POST /api/oauth/github/callback</code>
+</div>
+
+<Note>
+  Rate limited to **10 requests per 60 seconds**.
+</Note>
+
+### Request body
+
+<ParamField body="code" type="string" required>
+  The authorization code received from GitHub's OAuth flow.
+</ParamField>
+
+### Response `200`
+
+```json
+{
+  "user": {
+    "id": "cuid_abc123",
+    "email": "user@example.com",
+    "displayName": "John",
+    "avatar": "https://avatars.githubusercontent.com/u/12345",
+    "oauthAccounts": [
+      {
+        "provider": "github",
+        "providerUserId": "12345"
+      }
+    ]
+  },
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "refreshToken": "a1b2c3d4e5f6...",
+  "services": [...],
+  "banned": false,
+  "disabled": false
+}
+```
+
+### Response `400`
+
+```json
+{
+  "message": "GitHub account must have a verified primary email"
+}
+```
+
+---
+
+## Google callback
+
+<div>
+  <code className="font-bold text-lg">POST /api/oauth/google/callback</code>
+</div>
+
+<Note>
+  Rate limited to **10 requests per 60 seconds**.
+</Note>
+
+### Request body
+
+<ParamField body="code" type="string" required>
+  The authorization code received from Google's OAuth flow.
+</ParamField>
+
+### Response `200`
+
+Same structure as the GitHub callback response.
+
+### Response `400`
+
+```json
+{
+  "message": "Google account must have a verified email"
+}
+```
+
+---
+
+## Microsoft callback
+
+<div>
+  <code className="font-bold text-lg">POST /api/oauth/microsoft/callback</code>
+</div>
+
+<Note>
+  Rate limited to **10 requests per 60 seconds**.
+</Note>
+
+### Request body
+
+<ParamField body="code" type="string" required>
+  The authorization code received from Microsoft's OAuth flow.
+</ParamField>
+
+### Response `200`
+
+Same structure as the GitHub callback response.
+
+### Response `400`
+
+```json
+{
+  "message": "Microsoft account must have an email address"
+}
+```

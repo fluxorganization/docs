@@ -1,0 +1,76 @@
+---
+title: "Overview"
+description: "Introduction to Flux Pass - the shared auth service for all Flux apps"
+---
+
+Flux Pass is the API-only authentication service shared across all Flux applications. It handles user registration, login, sessions, OAuth, service entitlements, payments, and more.
+
+<Note>
+  Flux Pass is a **public-facing API** - unlike the Metadata Service, these endpoints are accessible from the internet. All authenticated endpoints require a valid Bearer token in the `Authorization` header.
+</Note>
+
+## Architecture
+
+Flux Pass is built with [NestJS](https://nestjs.com/) and uses the following stack:
+
+| Component | Technology |
+|---|---|
+| **Framework** | NestJS |
+| **Database** | PostgreSQL via [Prisma](https://www.prisma.io/) |
+| **Rate limiting** | [Arcjet](https://arcjet.com/) |
+| **Payments** | [Polar](https://polar.sh/) |
+| **Monitoring** | [Sentry](https://sentry.io/) |
+| **2FA** | TOTP via Speakeasy |
+| **Email** | Custom mail service with queue processing |
+
+## Authentication
+
+All authenticated endpoints require a Bearer token:
+
+```bash
+Authorization: Bearer <access_token>
+```
+
+Tokens are JWTs containing `userId`, `email`, and `sessionId`. Access tokens are short-lived; use the refresh token flow to obtain new ones.
+
+## Rate limiting
+
+Flux Pass uses Arcjet for rate limiting on sensitive endpoints:
+
+| Endpoint | Window | Max requests |
+|---|---|---|
+| Login | 60s | 30 |
+| Register | 60s | 10 |
+| Email verification | 60s | 5 |
+| Resend verification | 60s | 3 |
+| OAuth callbacks | 60s | 10 |
+| Health check | 60s | 50 |
+
+## API modules
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="lock" href="/api/fluxpass/auth">
+    Register, login, logout, email verification, 2FA, and token refresh.
+  </Card>
+  <Card title="OAuth" icon="right-to-bracket" href="/api/fluxpass/oauth">
+    Sign in with GitHub, Google, or Microsoft.
+  </Card>
+  <Card title="User" icon="user" href="/api/fluxpass/user">
+    Avatar management, custom domains, and service entitlements.
+  </Card>
+  <Card title="Connect" icon="plug" href="/api/fluxpass/connect">
+    Connect and disconnect from Flux services.
+  </Card>
+  <Card title="Payments" icon="credit-card" href="/api/fluxpass/payments">
+    Polar checkout, customer portal, and subscription management.
+  </Card>
+  <Card title="Admin" icon="shield" href="/api/fluxpass/admin">
+    User management and platform statistics (admin-only).
+  </Card>
+  <Card title="Audit" icon="clipboard-list" href="/api/fluxpass/audit">
+    Activity logs and audit trail.
+  </Card>
+  <Card title="Health" icon="heart-pulse" href="/api/fluxpass/health">
+    Service health check endpoint.
+  </Card>
+</CardGroup>

@@ -1,0 +1,482 @@
+---
+title: "Authentication"
+description: "User registration, login, logout, email verification, 2FA, and token refresh"
+---
+
+## Register
+
+<div>
+  <code className="font-bold text-lg">POST /api/auth/register</code>
+</div>
+
+Creates a new user account and sends a 6-digit verification code to the provided email. If the email already exists but is **not yet verified**, the password and display name are updated.
+
+<Note>
+  Rate limited to **10 requests per 60 seconds**.
+</Note>
+
+### Request body
+
+<ParamField body="email" type="string" required>
+  A valid email address.
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  Password - minimum 8 characters.
+</ParamField>
+
+<ParamField body="displayName" type="string">
+  Optional display name for the user.
+</ParamField>
+
+<Accordion title="Example request">
+```json
+{
+  "email": "user@example.com",
+  "password": "securePassword123",
+  "displayName": "John"
+}
+```
+</Accordion>
+
+### Response `201`
+
+```json
+{
+  "message": "Verification code sent to email",
+  "email": "user@example.com"
+}
+```
+
+### Response `409`
+
+Returned when a verified user with this email already exists.
+
+```json
+{
+  "message": "User already exists"
+}
+```
+
+---
+
+## Verify email
+
+<div>
+  <code className="font-bold text-lg">POST /api/auth/verify-email</code>
+</div>
+
+Verifies the user's email with the 6-digit code sent during registration. On success, the user is automatically logged in and receives tokens.
+
+<Note>
+  Rate limited to **5 requests per 60 seconds**.
+</Note>
+
+### Request body
+
+<ParamField body="email" type="string" required>
+  The email address to verify.
+</ParamField>
+
+<ParamField body="code" type="string" required>
+  The 6-digit verification code. Must be exactly 6 characters.
+</ParamField>
+
+<Accordion title="Example request">
+```json
+{
+  "email": "user@example.com",
+  "code": "482916"
+}
+```
+</Accordion>
+
+### Response `200`
+
+Returns the user profile, tokens, and service access - identical to a login response.
+
+```json
+{
+  "user": {
+    "id": "cuid_abc123",
+    "email": "user@example.com",
+    "displayName": "John",
+    "avatar": null
+  },
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "refreshToken": "a1b2c3d4e5f6...",
+  "services": [
+    {
+      "service": "DROP",
+      "tier": "free",
+      "isPremium": false,
+      "connected": true
+    }
+  ],
+  "banned": false,
+  "disabled": false
+}
+```
+
+### Response `401`
+
+```json
+{
+  "message": "Invalid or expired verification code"
+}
+```
+
+---
+
+## Resend verification
+
+<div>
+  <code className="font-bold text-lg">POST /api/auth/resend-verification</code>
+</div>
+
+Resends the email verification code. The previous code is invalidated and a new one is generated with a **15-minute expiry**.
+
+<Note>
+  Rate limited to **3 requests per 60 seconds**.
+</Note>
+
+### Request body
+
+<ParamField body="email" type="string" required>
+  The email address to resend the verification code to.
+</ParamField>
+
+### Response `200`
+
+```json
+{
+  "message": "Verification code resent successfully"
+}
+```
+
+### Response `409`
+
+```json
+{
+  "message": "Email is already verified"
+}
+```
+
+---
+
+## Login
+
+<div>
+  <code className="font-bold text-lg">POST /api/auth/login</code>
+</div>
+
+Authenticates a user with email and password. If the user has 2FA enabled, the first call returns a `requires2FA` flag - call login again with the `verificationCode` field.
+
+<Note>
+  Rate limited to **30 requests per 60 seconds**.
+</Note>
+
+### Request body
+
+<ParamField body="email" type="string" required>
+  User's email address.
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  User's password.
+</ParamField>
+
+<ParamField body="verificationCode" type="string">
+  TOTP verification code. Required on the second call when 2FA is enabled.
+</ParamField>
+
+### Flow: standard login
+
+<Accordion title="Example request">
+```json
+{
+  "email": "user@example.com",
+  "password": "securePassword123"
+}
+```
+</Accordion>
+
+#### Response `200`
+
+```json
+{
+  "user": {
+    "id": "cuid_abc123",
+    "email": "user@example.com",
+    "displayName": "John",
+    "avatar": null
+  },
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "refreshToken": "a1b2c3d4e5f6...",
+  "services": [
+    {
+      "service": "DROP",
+      "tier": "free",
+      "isPremium": false,
+      "connected": true
+    }
+  ],
+  "banned": false,
+  "disabled": false
+}
+```
+
+### Flow: 2FA login (two-step)
+
+**Step 1** - Login without verification code:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "securePassword123"
+}
+```
+
+Response:
+
+```json
+{
+  "user": {
+    "id": "cuid_abc123",
+    "email": "user@example.com",
+    "displayName": "John",
+    "avatar": null
+  },
+  "requires2FA": true,
+  "pendingToken": "eyJhbGciOiJIUzI1NiIs...",
+  "message": "2FA verification required"
+}
+```
+
+**Step 2** - Login with TOTP code:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "securePassword123",
+  "verificationCode": "482916"
+}
+```
+
+Returns the standard login response with tokens.
+
+### Response `401`
+
+<Accordion title="Email not verified">
+If the user's email is not verified, a new verification code is sent automatically.
+
+```json
+{
+  "message": "Email not verified",
+  "emailVerified": false,
+  "email": "user@example.com"
+}
+```
+</Accordion>
+
+<Accordion title="Invalid credentials">
+```json
+{
+  "message": "Invalid credentials"
+}
+```
+</Accordion>
+
+<Accordion title="Invalid 2FA code">
+```json
+{
+  "message": "Invalid 2FA verification code"
+}
+```
+</Accordion>
+
+---
+
+## Refresh tokens
+
+<div>
+  <code className="font-bold text-lg">POST /api/auth/refresh</code>
+</div>
+
+Exchanges a valid refresh token for a new access token and a new refresh token. The old refresh token is **revoked immediately** (rotation).
+
+<Info>
+  Refresh tokens are valid for **30 days**. Each refresh token can only be used **once** - a new one is issued with each rotation.
+</Info>
+
+### Request body
+
+<ParamField body="refreshToken" type="string" required>
+  The current refresh token.
+</ParamField>
+
+### Response `200`
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "refreshToken": "new_refresh_token_here..."
+}
+```
+
+### Response `401`
+
+```json
+{
+  "message": "Invalid or expired refresh token"
+}
+```
+
+---
+
+## Get current user
+
+<div>
+  <code className="font-bold text-lg">GET /api/auth/me</code>
+</div>
+
+Returns the authenticated user's profile.
+
+<Note>
+  Requires `Authorization: Bearer <token>` header.
+</Note>
+
+### Response `200`
+
+```json
+{
+  "user": {
+    "id": "cuid_abc123",
+    "email": "user@example.com",
+    "avatar": "cuid_abc123/avatar_1717596600.png",
+    "displayName": "John",
+    "twoFactorEnabled": false,
+    "createdAt": "2026-01-15T10:30:00.000Z",
+    "updatedAt": "2026-06-05T14:30:00.000Z",
+    "serviceAccess": [...],
+    "oauthAccounts": [...]
+  }
+}
+```
+
+---
+
+## Logout
+
+<div>
+  <code className="font-bold text-lg">POST /api/auth/logout</code>
+</div>
+
+Revokes the current session and all associated refresh tokens.
+
+<Note>
+  Requires `Authorization: Bearer <token>` header. The session ID is extracted from the JWT.
+</Note>
+
+### Response `200`
+
+```json
+{
+  "success": true
+}
+```
+
+---
+
+## Delete account
+
+<div>
+  <code className="font-bold text-lg">POST /api/auth/delete-account</code>
+</div>
+
+Permanently deletes the user's account and all associated data. Requires password confirmation and, if enabled, a 2FA code.
+
+<Warning>
+  This action is **irreversible**. All user data, sessions, service entitlements, and audit logs are permanently deleted.
+</Warning>
+
+### Request body
+
+<ParamField body="password" type="string">
+  Required if the account has a password (non-OAuth-only accounts).
+</ParamField>
+
+<ParamField body="verificationCode" type="string">
+  Required if 2FA is enabled on the account.
+</ParamField>
+
+### Response `200`
+
+```json
+{
+  "success": true
+}
+```
+
+---
+
+## Toggle 2FA
+
+<div>
+  <code className="font-bold text-lg">POST /api/auth/2fa</code>
+</div>
+
+Enables or disables two-factor authentication. Enabling 2FA is a two-step process.
+
+### Enable 2FA (step 1) - get QR code
+
+```json
+{
+  "enable": true
+}
+```
+
+Response:
+
+```json
+{
+  "qrCode": "data:image/png;base64,...",
+  "manualEntryKey": "JBSWY3DPEHPK3PXP",
+  "secret": "JBSWY3DPEHPK3PXP"
+}
+```
+
+### Enable 2FA (step 2) - confirm with TOTP code
+
+```json
+{
+  "enable": true,
+  "verificationCode": "482916",
+  "secret": "JBSWY3DPEHPK3PXP"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true
+}
+```
+
+### Disable 2FA
+
+```json
+{
+  "enable": false,
+  "verificationCode": "482916"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true
+}
+```

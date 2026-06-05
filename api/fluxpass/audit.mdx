@@ -1,0 +1,89 @@
+---
+title: "Audit"
+description: "Activity logs and audit trail"
+---
+
+The audit module records all significant actions performed by users. Logs are automatically created by other modules (auth, admin, user, connect) and can be queried through this endpoint.
+
+All endpoints require authentication via `Authorization: Bearer <token>`.
+
+---
+
+## Get audit logs
+
+<div>
+  <code className="font-bold text-lg">GET /api/audit</code>
+</div>
+
+Returns the authenticated user's audit logs, ordered by most recent first.
+
+<ParamField query="limit" type="number">
+  Maximum number of logs to return. Defaults to `50`, max `100`.
+</ParamField>
+
+<ParamField query="offset" type="number">
+  Number of logs to skip for pagination. Defaults to `0`.
+</ParamField>
+
+<ParamField query="action" type="string">
+  Filter by action type (see list below).
+</ParamField>
+
+### Response `200`
+
+```json
+{
+  "logs": [
+    {
+      "id": "log_abc123",
+      "action": "USER_LOGIN",
+      "data": {
+        "ipHash": "encrypted_ip_string",
+        "twoFactorUsed": false
+      },
+      "createdAt": "2026-06-05T14:30:00.000Z"
+    },
+    {
+      "id": "log_def456",
+      "action": "SESSION_CREATE",
+      "data": {
+        "ipHash": "encrypted_ip_string"
+      },
+      "createdAt": "2026-06-05T14:30:00.000Z"
+    }
+  ],
+  "total": 142,
+  "limit": 50,
+  "offset": 0
+}
+```
+
+---
+
+## Audit action types
+
+All possible actions recorded by the audit system:
+
+| Action | Triggered by |
+|---|---|
+| `USER_LOGIN` | Successful login (password or OAuth) |
+| `USER_LOGOUT` | Session logout |
+| `USER_REGISTER` | New account creation (via OAuth) |
+| `PASSWORD_CHANGE` | Password update |
+| `TWO_FACTOR_ENABLE` | 2FA enabled |
+| `TWO_FACTOR_DISABLE` | 2FA disabled |
+| `USER_UPDATE` | Profile changes (avatar, custom domain, etc.) |
+| `USER_DELETE` | Account deletion |
+| `SESSION_CREATE` | New session started |
+| `SESSION_DELETE` | Session manually revoked |
+| `SERVICE_ACCESS_GRANT` | Admin grants service access |
+| `SERVICE_ACCESS_REVOKE` | Admin revokes service access |
+| `SERVICE_TIER_CHANGE` | Service tier changed |
+| `SUBSCRIPTION_CREATE` | New subscription via Polar |
+| `SUBSCRIPTION_UPDATE` | Subscription modified |
+| `SUBSCRIPTION_CANCEL` | Subscription canceled |
+| `SUBSCRIPTION_REVOKE` | Subscription revoked |
+| `USER_BAN` | User banned |
+| `USER_DISABLE` | User disabled |
+| `SERVICE_ENTITLEMENT_CONNECT` | Service connection activated |
+| `SERVICE_ENTITLEMENT_DISCONNECT` | Service connection deactivated |

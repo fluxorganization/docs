@@ -1,0 +1,158 @@
+---
+title: "Admin"
+description: "User management and platform statistics (admin-only)"
+---
+
+<Warning>
+  All admin endpoints require either:
+  - An `x-internal-secret` header matching the server's `INTERNAL_SECRET` environment variable, **or**
+  - A Bearer token from a user with `accessFlags.isNullDropTeam = true` and `nullDropTeamRole` of `founder` or `dev`
+</Warning>
+
+---
+
+## List users
+
+<div>
+  <code className="font-bold text-lg">GET /api/admin/users</code>
+</div>
+
+Returns a paginated list of all users with their DROP service entitlements.
+
+<ParamField query="page" type="number">
+  Page number. Defaults to `1`.
+</ParamField>
+
+<ParamField query="limit" type="number">
+  Users per page. Defaults to `50`.
+</ParamField>
+
+### Response `200`
+
+```json
+{
+  "users": [
+    {
+      "id": "cuid_abc123",
+      "email": "user@example.com",
+      "displayName": "John",
+      "avatar": "cuid_abc123/avatar_1717596600.png",
+      "createdAt": "2026-01-15T10:30:00.000Z",
+      "updatedAt": "2026-06-05T14:30:00.000Z",
+      "serviceAccess": {
+        "tier": "pro",
+        "isPremium": true,
+        "accessFlags": {},
+        "metadata": {},
+        "customStorageLimit": null,
+        "customApiKeyLimit": null
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 50,
+    "totalCount": 1842,
+    "totalPages": 37,
+    "hasMore": true
+  }
+}
+```
+
+---
+
+## Get user stats
+
+<div>
+  <code className="font-bold text-lg">GET /api/admin/users/stats</code>
+</div>
+
+Returns aggregate user statistics for the platform.
+
+### Response `200`
+
+```json
+{
+  "totalUsers": 1842,
+  "premiumUsers": 156,
+  "freeUsers": 1686
+}
+```
+
+---
+
+## Update user service
+
+<div>
+  <code className="font-bold text-lg">PATCH /api/admin/users/&#123;userId&#125;</code>
+</div>
+
+Updates or creates a service entitlement for a specific user. All changes are recorded in the audit log.
+
+<ParamField path="userId" type="string" required>
+  The target user's ID.
+</ParamField>
+
+<ParamField body="service" type="string" required>
+  Service identifier (e.g., `DROP`).
+</ParamField>
+
+<ParamField body="tier" type="string">
+  Service tier (e.g., `free`, `pro-lite`, `pro`, `enterprise`).
+</ParamField>
+
+<ParamField body="isPremium" type="boolean">
+  Whether the user has premium access.
+</ParamField>
+
+<ParamField body="accessFlags" type="object">
+  Custom access flags (e.g., `{ "isNullDropTeam": true, "nullDropTeamRole": "dev" }`).
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Arbitrary metadata.
+</ParamField>
+
+<ParamField body="customStorageLimit" type="number">
+  Custom storage limit override in bytes.
+</ParamField>
+
+<ParamField body="customApiKeyLimit" type="number">
+  Custom API key limit override.
+</ParamField>
+
+<Accordion title="Example request">
+```json
+{
+  "service": "DROP",
+  "tier": "pro",
+  "isPremium": true,
+  "accessFlags": {
+    "isNullDropTeam": false
+  }
+}
+```
+</Accordion>
+
+### Response `200`
+
+```json
+{
+  "entitlement": {
+    "id": "ent_abc123",
+    "userId": "cuid_target",
+    "service": "DROP",
+    "tier": "pro",
+    "isPremium": true,
+    ...
+  }
+}
+```
+
+### Response `404`
+
+```json
+{
+  "message": "User not found"
+}
+```

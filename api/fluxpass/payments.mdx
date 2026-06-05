@@ -1,0 +1,93 @@
+---
+title: "Payments"
+description: "Polar checkout, customer portal, and webhook handling"
+---
+
+Flux Pass integrates with [Polar](https://polar.sh/) for subscription management and payments. Prices are handled in USD by Polar and converted to PLN for display.
+
+---
+
+## Checkout
+
+<div>
+  <code className="font-bold text-lg">GET /api/polar/checkout</code>
+</div>
+
+Generates a Polar checkout session and redirects the user to the payment page. Requires authentication.
+
+<ParamField query="plan" type="string" required>
+  Subscription plan. One of: `pro-lite`, `pro`.
+</ParamField>
+
+<ParamField query="billingCycle" type="string" required>
+  Billing cycle. One of: `monthly`, `yearly`.
+</ParamField>
+
+### Response `303`
+
+Redirects to the Polar checkout URL.
+
+### Response `400`
+
+```json
+{
+  "message": "Invalid plan or billingCycle"
+}
+```
+
+---
+
+## Customer portal
+
+<div>
+  <code className="font-bold text-lg">GET /api/polar/portal</code>
+</div>
+
+Creates a Polar customer portal session and redirects the user. The portal allows users to manage their subscription, view invoices, and update payment methods.
+
+### Response `307`
+
+Redirects to the Polar customer portal URL.
+
+### Response `400`
+
+```json
+{
+  "message": "No Polar customer ID found. Please contact support."
+}
+```
+
+---
+
+## Webhooks
+
+<div>
+  <code className="font-bold text-lg">POST /api/webhooks/drop</code>
+</div>
+
+Receives Polar webhook events for the DROP service. This endpoint is called by Polar's servers - do not call it manually.
+
+<Warning>
+  This endpoint processes webhook payloads from Polar. It is not intended for client use.
+</Warning>
+
+### Handled events
+
+| Event | Action |
+|---|---|
+| `subscription.created` | Sets user tier to the subscription plan, marks as premium |
+| `subscription.updated` | Updates tier and premium status based on subscription state |
+| `subscription.active` | Same as `subscription.updated` |
+| `subscription.canceled` | Marks subscription status as `canceled` (access continues until period end) |
+| `subscription.revoked` | Immediately revokes premium access, resets to `free` tier |
+| `customer.created` | Links Polar customer ID to user entitlement |
+| `customer.updated` | Updates Polar customer ID |
+| `customer.deleted` | Removes Polar customer data, resets to `free` tier |
+
+### Response `200`
+
+```json
+{
+  "received": true
+}
+```

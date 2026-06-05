@@ -1,0 +1,38 @@
+---
+title: "Health"
+description: "Service health check endpoint"
+---
+
+## Health check
+
+<div>
+  <code className="font-bold text-lg">GET /api/health</code>
+</div>
+
+Returns the current status of the Flux Pass service. Use this for uptime monitoring and load balancer health checks.
+
+<Note>
+  This endpoint is **not** prefixed with `/api/` in the controller - it's mounted at the root level as `GET /health`. Rate limited to **50 requests per 60 seconds**.
+</Note>
+
+### Response `200`
+
+```json
+{
+  "service": "fluxpass",
+  "version": "1.0.0",
+  "status": "ok"
+}
+```
+
+<ResponseField name="service" type="string">
+  Service identifier. Always `fluxpass`.
+</ResponseField>
+
+<ResponseField name="version" type="string">
+  Current API version.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Service status. `ok` when healthy.
+</ResponseField>

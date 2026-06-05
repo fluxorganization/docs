@@ -1,0 +1,305 @@
+---
+title: "User"
+description: "Avatar management, custom domains, services, and subscriptions"
+---
+
+All endpoints on this page require authentication via `Authorization: Bearer <token>`.
+
+---
+
+## Avatar
+
+### Get avatar
+
+<div>
+  <code className="font-bold text-lg">GET /api/avatar</code>
+</div>
+
+Returns the user's avatar image. If the avatar is an external URL (e.g., from an OAuth provider), the response is a `302` redirect. Otherwise, the image binary is returned directly.
+
+#### Response `200`
+
+Binary image data with appropriate `Content-Type` header (`image/jpeg`, `image/png`, `image/webp`, or `image/gif`).
+
+#### Response `302`
+
+Redirect to external avatar URL (OAuth avatars).
+
+#### Response `404`
+
+```json
+{
+  "message": "Avatar not found"
+}
+```
+
+---
+
+### Upload avatar
+
+<div>
+  <code className="font-bold text-lg">POST /api/avatar</code>
+</div>
+
+Uploads a new avatar image. The old avatar is automatically deleted.
+
+<Info>
+  Send the file as `multipart/form-data` with the field name `avatar`.
+</Info>
+
+| Constraint | Value |
+|---|---|
+| Max file size | 2 MB |
+| Allowed formats | JPEG, PNG, WebP, GIF |
+
+#### Response `200`
+
+```json
+{
+  "avatar": "cuid_abc123/avatar_1717596600.png",
+  "message": "Avatar uploaded successfully"
+}
+```
+
+#### Response `400`
+
+```json
+{
+  "message": "File too large. Maximum size is 2MB"
+}
+```
+
+---
+
+### Delete avatar
+
+<div>
+  <code className="font-bold text-lg">DELETE /api/avatar</code>
+</div>
+
+Removes the user's avatar.
+
+#### Response `200`
+
+```json
+{
+  "message": "Avatar deleted successfully"
+}
+```
+
+---
+
+## Custom domain
+
+<Warning>
+  Custom domains are only available on the **enterprise** tier for the DROP service.
+</Warning>
+
+### Get custom domain
+
+<div>
+  <code className="font-bold text-lg">GET /api/user/custom-domain</code>
+</div>
+
+Returns the current custom domain configuration.
+
+#### Response `200`
+
+```json
+{
+  "customDomain": "files.example.com",
+  "customDomainVerified": true,
+  "hasCustomDomain": true
+}
+```
+
+#### Response `403`
+
+```json
+{
+  "message": "Enterprise plan required for custom domains"
+}
+```
+
+---
+
+### Set custom domain
+
+<div>
+  <code className="font-bold text-lg">POST /api/user/custom-domain</code>
+</div>
+
+Connects a custom domain to the user's DROP service. The domain starts as **unverified** - DNS configuration is required.
+
+<ParamField body="domain" type="string" required>
+  The custom domain to connect (e.g., `files.example.com`).
+</ParamField>
+
+#### Response `200`
+
+```json
+{
+  "success": true,
+  "domain": "files.example.com",
+  "message": "Domain connected successfully. Please configure your DNS settings."
+}
+```
+
+#### Response `409`
+
+```json
+{
+  "message": "Domain is already in use"
+}
+```
+
+---
+
+### Delete custom domain
+
+<div>
+  <code className="font-bold text-lg">DELETE /api/user/custom-domain</code>
+</div>
+
+Disconnects the custom domain.
+
+#### Response `200`
+
+```json
+{
+  "success": true,
+  "message": "Custom domain disconnected successfully"
+}
+```
+
+---
+
+## Services
+
+### List services
+
+<div>
+  <code className="font-bold text-lg">GET /api/services</code>
+</div>
+
+Returns the user's service entitlements. Optionally filter by service.
+
+<ParamField query="service" type="string">
+  Filter by service identifier. Currently supported: `DROP`.
+</ParamField>
+
+#### Response `200`
+
+```json
+{
+  "entitlements": [
+    {
+      "id": "ent_abc123",
+      "userId": "cuid_abc123",
+      "service": "DROP",
+      "tier": "pro",
+      "isPremium": true,
+      "connected": true,
+      "customStorageLimit": null,
+      "customApiKeyLimit": null,
+      "metadata": {},
+      "createdAt": "2026-01-15T10:30:00.000Z",
+      "updatedAt": "2026-06-05T14:30:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+### Update service
+
+<div>
+  <code className="font-bold text-lg">POST /api/services</code>
+</div>
+
+Creates or updates a service entitlement for the current user.
+
+<ParamField body="service" type="string" required>
+  Service identifier (e.g., `DROP`).
+</ParamField>
+
+<ParamField body="tier" type="string">
+  Service tier (e.g., `free`, `pro-lite`, `pro`, `enterprise`).
+</ParamField>
+
+<ParamField body="isPremium" type="boolean">
+  Whether the user has premium access.
+</ParamField>
+
+<ParamField body="accessFlags" type="object">
+  Custom access flags for the service.
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Arbitrary metadata for the service entitlement.
+</ParamField>
+
+<ParamField body="customStorageLimit" type="number">
+  Custom storage limit override in bytes.
+</ParamField>
+
+<ParamField body="customApiKeyLimit" type="number">
+  Custom API key limit override.
+</ParamField>
+
+#### Response `200`
+
+```json
+{
+  "entitlement": {
+    "id": "ent_abc123",
+    "service": "DROP",
+    "tier": "pro",
+    "isPremium": true,
+    ...
+  }
+}
+```
+
+---
+
+## Subscription
+
+### Get subscription
+
+<div>
+  <code className="font-bold text-lg">GET /api/subscription</code>
+</div>
+
+Returns the user's current Polar subscription details for the DROP service. Prices are converted to PLN.
+
+#### Response `200`
+
+```json
+{
+  "id": "sub_polar_123",
+  "status": "active",
+  "currentPeriodStart": 1717200000,
+  "currentPeriodEnd": 1719792000,
+  "cancelAtPeriodEnd": false,
+  "plan": "pro",
+  "billingCycle": "monthly",
+  "price": {
+    "amount": 39.96,
+    "currency": "pln",
+    "interval": "month"
+  },
+  "product": {
+    "name": "Premium"
+  }
+}
+```
+
+#### Response `404`
+
+```json
+{
+  "message": "No active subscription"
+}
+```

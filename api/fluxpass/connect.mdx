@@ -1,0 +1,121 @@
+---
+title: "Connect"
+description: "Connect and disconnect from Flux services"
+---
+
+The Connect module manages service connections for users. A user can have entitlements for multiple Flux services, and this module handles toggling the `connected` status.
+
+All endpoints require authentication via `Authorization: Bearer <token>`.
+
+---
+
+## Check connection
+
+<div>
+  <code className="font-bold text-lg">GET /api/connect/check</code>
+</div>
+
+Checks if the authenticated user is connected to a specific service.
+
+<ParamField query="service" type="string" required>
+  The service identifier to check. Currently supported: `DROP`.
+</ParamField>
+
+### Response `200` - connected
+
+```json
+{
+  "connected": true,
+  "service": "DROP",
+  "tier": "pro",
+  "isPremium": true
+}
+```
+
+### Response `200` - no entitlement
+
+```json
+{
+  "connected": false,
+  "service": "DROP",
+  "message": "No entitlement found for this service"
+}
+```
+
+---
+
+## Connect to service
+
+<div>
+  <code className="font-bold text-lg">POST /api/connect/connect</code>
+</div>
+
+Activates the user's connection to a service. The user must already have an entitlement for the service.
+
+<ParamField body="service" type="string" required>
+  The service identifier to connect to (e.g., `DROP`).
+</ParamField>
+
+### Response `200`
+
+```json
+{
+  "connected": true,
+  "service": "DROP",
+  "tier": "pro",
+  "isPremium": true,
+  "message": "Successfully connected to service"
+}
+```
+
+### Response `200` - already connected
+
+```json
+{
+  "connected": true,
+  "service": "DROP",
+  "message": "Already connected to this service"
+}
+```
+
+### Response `404`
+
+```json
+{
+  "message": "Service entitlement not found. Please ensure you have access to this service."
+}
+```
+
+---
+
+## Disconnect from service
+
+<div>
+  <code className="font-bold text-lg">POST /api/connect/disconnect</code>
+</div>
+
+Deactivates the user's connection to a service without removing the entitlement.
+
+<ParamField body="service" type="string" required>
+  The service identifier to disconnect from (e.g., `DROP`).
+</ParamField>
+
+### Response `200`
+
+```json
+{
+  "connected": false,
+  "service": "DROP",
+  "tier": "pro",
+  "isPremium": true,
+  "message": "Successfully disconnected from service"
+}
+```
+
+### Response `404`
+
+```json
+{
+  "message": "Service entitlement not found. Please ensure you have access to this service."
+}
+```
