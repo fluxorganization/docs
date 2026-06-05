@@ -1,6 +1,6 @@
 ---
 title: "DEK management"
-description: "Wrap and unwrap Data Encryption Keys using the master key"
+description: "Wrap and unwrap Data Encryption Keys with the Flux Metadata Service master key during internal file upload and download flows."
 ---
 
 The DEK (Data Encryption Key) endpoints handle encryption key wrapping. The client's VPS sends a plain DEK, and the Metadata Service encrypts it with the master key (wrap) or decrypts an existing wrapped DEK back to plaintext (unwrap).
