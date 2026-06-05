@@ -68,6 +68,12 @@
             ]
           }
         ]
+      },
+      {
+        "tab": "Build On Top",
+        "pages": [
+          "build-on-top"
+        ]
       }
     ],
     "global": {
