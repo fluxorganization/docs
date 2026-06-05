@@ -1,0 +1,72 @@
+---
+title: "Verify Webhooks"
+description: "How to securely verify incoming webhook payloads"
+---
+
+To ensure that incoming webhooks are genuinely originating from Flux Drop and have not been tampered with, you must verify the signature included in the `X-Fluxdrop-Signature` header.
+
+## Cryptographic signature
+
+Flux Drop signs the webhook payload using **HMAC SHA-256** with your unique webhook secret. The raw POST body is used as the cryptographic message.
+
+<Warning>
+  You must use the raw, unparsed string body of the request to compute the signature. Parsing the body into JSON and stringifying it again will change the byte order and spacing, causing the signature verification to fail.
+</Warning>
+
+## Verification steps
+
+1. Extract the `X-Fluxdrop-Signature` header from the incoming request.
+2. Extract the raw string payload of the request body.
+3. Compute an HMAC SHA-256 hash using your webhook secret and the raw payload.
+4. Compare the computed hash with the provided signature. If they match, the payload is authentic.
+
+## Example: Node.js (Express)
+
+Here is a simple example of how to verify the signature in a Node.js Express application.
+
+```typescript
+import express from 'express'
+import crypto from 'crypto'
+
+const app = express()
+const WEBHOOK_SECRET = 'your_webhook_secret_here'
+
+// Use raw body parser to preserve the exact payload
+app.use(express.raw({ type: 'application/json' }))
+
+app.post('/webhook', (req, res) => {
+
+  const signature = req.headers['x-fluxdrop-signature']
+  
+  if (!signature) {
+    return res.status(401).send('Missing signature');
+  }
+
+  // Compute our expected signature
+  const expectedSignature = crypto
+    .createHmac('sha256', WEBHOOK_SECRET)
+    .update(req.body) // req.body is a Buffer because of express.raw()
+    .digest('hex')
+
+  // Securely compare the signatures
+  if (expectedSignature !== signature) {
+    return res.status(401).send('Invalid signature')
+  }
+
+  // Parse the JSON payload now that we know it's safe
+  const payload = JSON.parse(req.body.toString())
+
+  console.log(`Received valid event: ${payload.event}`)
+  
+  // Respond with 200 OK to acknowledge receipt
+  res.status(200).send('OK')
+});
+
+app.listen(3000, () => console.log('Listening for webhooks on port 3000'))
+```
+
+## Replay prevention
+
+For additional security, you can verify the `X-Fluxdrop-Timestamp` header. This header contains the Unix timestamp of when the request was dispatched.
+
+You can compare this timestamp to your server's current time and reject any requests that are older than a specific tolerance (e.g., 5 minutes). This prevents attackers from capturing a valid request and "replaying" it later.

@@ -50,6 +50,19 @@
         ]
       },
       {
+        "tab": "Webhooks",
+        "pages": [
+          {
+            "group": "Overview",
+            "pages": ["api/webhooks/overview"]
+          },
+          {
+            "group": "Security",
+            "pages": ["api/webhooks/verify"]
+          }
+        ]
+      },
+      {
         "tab": "Flux Pass",
         "pages": [
           {
