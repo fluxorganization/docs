@@ -11,6 +11,16 @@ The **Thumbnail Service** is an asynchronous background worker powered by [Bun](
 
 ## Architecture
 
+```mermaid
+graph TD
+  Client[Client Application] -->|Upload File| S3[S3-compatible Storage]
+  Client -->|Notify| Metadata[Metadata Service]
+  Metadata -->|LPUSH / RPUSH| Valkey[(Valkey Queue)]
+  Valkey -->|BLPOP| Worker[Thumbnail Worker]
+  Worker -->|Bun.image / FFmpeg| Process[Process Images & Videos]
+  Process -->|Upload variants| S3
+```
+
 | Component | Technology |
 |---|---|
 | **Runtime** | Bun |

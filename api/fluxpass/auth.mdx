@@ -192,14 +192,28 @@ Authenticates a user with email and password. If the user has 2FA enabled, the f
 
 ### Flow: standard login
 
-<Accordion title="Example request">
-```json
-{
-  "email": "user@example.com",
-  "password": "securePassword123"
-}
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.fluxdrop.com/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "securePassword123"
+  }'
 ```
-</Accordion>
+
+```javascript Node.js
+const response = await fetch('https://api.fluxdrop.com/api/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    email: 'user@example.com',
+    password: 'securePassword123'
+  })
+});
+const data = await response.json();
+```
+</CodeGroup>
 
 #### Response `200`
 
@@ -342,9 +356,7 @@ Exchanges a valid refresh token for a new access token and a new refresh token. 
 
 Returns the authenticated user's profile.
 
-<Note>
-  Requires `Authorization: Bearer <token>` header.
-</Note>
+<Snippet file="bearer-token.mdx"/>
 
 ### Response `200`
 

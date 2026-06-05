@@ -39,6 +39,22 @@ Before diving into the API, familiarize yourself with these core concepts:
 | **Valkey** | In-memory cache layer used to store frequently accessed metadata with TTL-based expiration. |
 | **Convex** | The primary database backing persistent metadata and file records. |
 
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="Is my data encrypted?" icon="lock">
+    Yes! **Every file uploaded to Flux is fully encrypted**, with the sole exception of file thumbnails. We use a combination of Master Keys and per-file Data Encryption Keys (DEKs).
+  </Accordion>
+
+  <Accordion title="Can I use the API for my own projects?" icon="code">
+    Currently, our API is restricted to internal use only. We are focused on building a rock-solid foundation for our own web applications before opening up to third-party developers.
+  </Accordion>
+
+  <Accordion title="Where is the data stored?" icon="server">
+    We utilize highly reliable S3-compatible object storage across multiple regions, paired with our fast Valkey caching layer to ensure minimal latency.
+  </Accordion>
+</AccordionGroup>
+
 ## API conventions
 
 All Flux API endpoints follow a consistent pattern:
