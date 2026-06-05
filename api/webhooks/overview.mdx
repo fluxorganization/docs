@@ -17,7 +17,7 @@ It listens to an internal Valkey queue and dispatches HTTP POST requests with cr
 
 ## How it works
 
-When a significant event occurs in the Flux Drop (e.g., a file is uploaded or downloaded), a message is queued for the Webhook Service. The worker then:
+When a significant event occurs in Flux Drop (e.g., a file is uploaded or downloaded), a message is queued for the Webhook Service. The worker then:
 
 1. Constructs a standard JSON payload with the event details.
 2. Computes an HMAC SHA-256 signature using your webhook secret.
