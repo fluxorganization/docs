@@ -18,7 +18,10 @@
         "pages": [
           {
             "group": "Getting Started",
-            "pages": ["index", "quickstart"]
+            "pages": [
+              "index",
+              "quickstart"
+            ]
           }
         ]
       },
@@ -36,7 +39,9 @@
           },
           {
             "group": "Experimental",
-            "pages": ["api/metadata/experimental"]
+            "pages": [
+              "api/metadata/experimental"
+            ]
           }
         ]
       },
@@ -45,7 +50,9 @@
         "pages": [
           {
             "group": "Core",
-            "pages": ["api/thumbnails/overview"]
+            "pages": [
+              "api/thumbnails/overview"
+            ]
           }
         ]
       },
@@ -54,11 +61,15 @@
         "pages": [
           {
             "group": "Overview",
-            "pages": ["api/webhooks/overview"]
+            "pages": [
+              "api/webhooks/overview"
+            ]
           },
           {
             "group": "Security",
-            "pages": ["api/webhooks/verify"]
+            "pages": [
+              "api/webhooks/verify"
+            ]
           }
         ]
       },
@@ -67,19 +78,29 @@
         "pages": [
           {
             "group": "Overview",
-            "pages": ["api/fluxpass/overview"]
+            "pages": [
+              "api/fluxpass/overview"
+            ]
           },
           {
             "group": "Authentication",
-            "pages": ["api/fluxpass/auth", "api/fluxpass/oauth"]
+            "pages": [
+              "api/fluxpass/auth",
+              "api/fluxpass/oauth"
+            ]
           },
           {
             "group": "User management",
-            "pages": ["api/fluxpass/user", "api/fluxpass/connect"]
+            "pages": [
+              "api/fluxpass/user",
+              "api/fluxpass/connect"
+            ]
           },
           {
             "group": "Payments",
-            "pages": ["api/fluxpass/payments"]
+            "pages": [
+              "api/fluxpass/payments"
+            ]
           },
           {
             "group": "Platform",

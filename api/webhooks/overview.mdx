@@ -92,4 +92,4 @@ The Webhook Service currently supports the following event types:
 
 ## Delivery logs
 
-The service keeps a rotating log of the last **100 delivery attempts** (retained for 7 days) per user in Valkey. This log tracks the `endpoint`, `event`, `status` code, and `duration_ms` to help you debug any integration issues.
+The service keeps a rotating log of the last **10 delivery attempts** (retained for 7 days) per user in Valkey. This log tracks the `endpoint`, `event`, `status` code, and `duration_ms` to help you debug any integration issues.
