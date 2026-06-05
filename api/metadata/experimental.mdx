@@ -19,7 +19,7 @@ Synchronizes file metadata from the database to [Valkey](https://valkey.io/) wit
 
 Under normal operation, individual file metadata entries are cached in Valkey with a **1-hour TTL** based on access patterns. This works well for most users, but when a user switches between apps frequently, the cache can become stale or fragmented.
 
-The sync endpoint performs a **bulk synchronization** - it takes all (or the most active) files for a user and pushes them into Valkey with a longer TTL in a single operation, instead of relying on individual cache hits.
+The sync endpoint performs a **bulk synchronization**. It takes all (or the most active) files for a user and pushes them into Valkey with a longer TTL in a single operation, instead of relying on individual cache hits.
 
 <Warning>
   **Hard limit**: A single sync operation cannot exceed **450 MB** of data. Behavior when exceeding this limit depends on the selected sync type.
